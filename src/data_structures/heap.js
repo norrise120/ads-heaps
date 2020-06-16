@@ -1,5 +1,5 @@
 class MaxHeap {
-  static DEFAULT_SIZE = 1023
+  static DEFAULT_SIZE = 1023;
 
   /**
    * Create a new empty max heap of a given size, optionally from an existing array
@@ -10,8 +10,8 @@ class MaxHeap {
   constructor({ size = this.constructor.DEFAULT_SIZE, fromArray } = {}) {
     if (fromArray) {
       this._storage = fromArray;
-      this._size = fromArray.length - 1;
-      this._count = this._size;
+      this.size = fromArray.length - 1;
+      this._count = this.size;
       this._buildheap();
 
     } else {
@@ -62,15 +62,41 @@ class MaxHeap {
   }
 
   _float(i) {
-    // TODO
+    while (
+      this._parent(i) &&
+      this._storage[i].priority > this._storage[this._parent(i)].priority
+    ) {
+      this._swap(i, this._parent(i));
+      this._float(this._parent(i));
+    }
+    return;
   }
 
   _sink(i) {
-    // TODO
+    const left = this._left(i);
+    const right = this._right(i);
+    while (
+      (left <= this._count &&
+        this._storage[i].priority < this._storage[left].priority) ||
+      (right <= this._count &&
+        this._storage[i].priority < this._storage[right].priority)
+    ) {
+      if (this._storage[i].priority < this._storage[left].priority) {
+        this._swap(i, left);
+        this._sink(left);
+      } else if (this._storage[i].priority < this._storage[right].priority) {
+        this._swap(i, right);
+        this._sink(right);
+      } else {
+        return;
+      }
+    }
   }
 
   _buildheap() {
-    // TODO
+    for (let i = 1; i <= this.size; i += 1) {
+      this._sink(i);
+    }
   }
 
   /**
@@ -81,7 +107,13 @@ class MaxHeap {
    * @throws If the heap is full
    */
   insert(priority, element) {
-    // TODO
+    if (this._count < this.size) {
+      this._count += 1;
+      this._storage[this._count] = { priority, element };
+      this._float(this._count);
+    } else {
+      throw new Error("Heap is already full");
+    }
   }
 
   /**
@@ -90,7 +122,23 @@ class MaxHeap {
    * @returns {*} The data stored in the highest-priority record, or undefined if the queue is empty
    */
   removeMax() {
-    // TODO
+    if (!this._count) {
+      return undefined;
+    }
+
+    if (this._count === 1) {
+      this._count -= 1;
+      const element = this._storage[1].element;
+      this._storage[1] = null;
+      return element;
+    } else {
+      this._swap(1, this._count);
+      const element = this._storage[this._count].element;
+      this._storage[this._count] = null;
+      this._count -= 1;
+      this._sink(1);
+      return element;
+    }
   }
 
   /** 
@@ -111,7 +159,12 @@ class MaxHeap {
    * @returns Sorted storage array. Note that the array is 1-indexed (so the first element is null)
    */
   sort() {
-    // TODO
+    while (this._count > 0) {
+      this._swap(1, this._count);
+      this._count -= 1;
+      this._sink(1);
+    }
+    return this._storage;
   }
 }
 
